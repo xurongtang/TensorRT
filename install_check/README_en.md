@@ -63,3 +63,9 @@ cd ~/CppProj/TensorProj/install_check
 ```
 
 For detailed compilation information, please read: `install_check/demo/CMakeLists.txt` and `install_check/build.sh` files
+
+**Reference**
+- 文档: https://docs.nvidia.com/deeplearning/tensorrt/latest/installing-tensorrt/installing.html
+- 下载：https://developer.nvidia.com/tensorrt/download/10x  
+- 测试程序：https://github.com/NVIDIA/TensorRT/tree/main/samples/sampleOnnxMNIST  
+- 数据：https://github.com/NVIDIA/TensorRT/releases  
