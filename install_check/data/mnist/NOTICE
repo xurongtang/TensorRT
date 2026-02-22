@@ -1,0 +1,24 @@
+NOTICE
+
+This product includes software developed by the ONNX Model Zoo project.
+
+Original Source: ONNX Model Zoo
+Repository: https://github.com/onnx/models/tree/main/validated/vision/classification/mnist
+License: Apache License 2.0
+Original Copyright: Copyright (c) ONNX contributors
+
+Disclaimer: AI models generate responses and outputs based on complex algorithms and machine learning techniques, and those responses or outputs may be inaccurate or offensive. By downloading a model, you assume the risk of any harm caused by any response or output of the model. By using this software or model, you are agreeing to the terms and conditions of the license.
+
+The mnist.onnx model was originally published in the ONNX Model Zoo under the Apache License 2.0.
+
+Model Details:
+- Model Name: MNIST
+- Model Version: Opset 8
+- Model Type: Computer Vision - Image Classification
+- Framework: ONNX
+- Original Location: https://github.com/onnx/models/tree/main/validated/vision/classification/mnist
+
+This distribution includes the model as part of TensorRT samples and examples.
+
+Additional License Information:
+https://github.com/onnx/models/blob/main/LICENSE

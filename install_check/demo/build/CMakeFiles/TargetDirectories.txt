@@ -1,0 +1,3 @@
+/home/rton/CppProj/TensorProj/install_check/demo/build/CMakeFiles/sample_onnx_mnist.dir
+/home/rton/CppProj/TensorProj/install_check/demo/build/CMakeFiles/edit_cache.dir
+/home/rton/CppProj/TensorProj/install_check/demo/build/CMakeFiles/rebuild_cache.dir
