@@ -1,0 +1,131 @@
+cmake_minimum_required(VERSION 3.22)
+project(sample_onnx_mnist)
+
+# SPDX-License-Identifier: Apache-2.0
+# ... (license header 保持不变) ...
+
+# 查找 CUDA
+find_package(CUDA REQUIRED)
+
+set(TENSORRT_ROOT "/home/rton/TensorRT/TensorRT-10.11.0.33")
+set(OPENCV_INSTALL_DIR "/home/rton/CppProj/TensorProj/3rdparty/opencv-install-x86")
+
+# =============== OpenCV 配置 ===============
+set(OpenCV_DIR ${OPENCV_INSTALL_DIR}/lib/cmake/opencv4)
+find_package(OpenCV REQUIRED NO_MODULE)
+# 打印 OpenCV 信息便于调试
+message(STATUS "OpenCV found: ${OpenCV_VERSION}")
+message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
+
+# 查找 TensorRT 库
+find_path(TENSORRT_INCLUDE_DIR NvInfer.h
+    HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR}
+    PATH_SUFFIXES include)
+
+find_library(TENSORRT_LIBRARY_INFER nvinfer
+    HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR}
+    PATH_SUFFIXES lib lib64 lib/x64)
+
+find_library(TENSORRT_LIBRARY_ONNX_PARSER nvonnxparser
+    HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR}
+    PATH_SUFFIXES lib lib64 lib/x64)
+
+find_library(TENSORRT_LIBRARY_PLUGIN nvinfer_plugin
+    HINTS ${TENSORRT_ROOT} ${CUDA_TOOLKIT_ROOT_DIR}
+    PATH_SUFFIXES lib lib64 lib/x64)
+
+if(NOT TENSORRT_INCLUDE_DIR OR NOT TENSORRT_LIBRARY_INFER OR NOT TENSORRT_LIBRARY_ONNX_PARSER)
+    message(FATAL_ERROR "Cannot find TensorRT headers or libraries. Please set TENSORRT_ROOT appropriately.")
+endif()
+
+# 添加 TensorRT samples 头文件目录
+set(TRT_SAMPLES_COMMON_DIR "${TENSORRT_ROOT}/samples/common")
+set(TRT_SAMPLES_UTILS_DIR "${TENSORRT_ROOT}/samples/utils")
+set(TRT_SAMPLES_DIR "${TENSORRT_ROOT}/samples")
+
+if(NOT EXISTS "${TRT_SAMPLES_COMMON_DIR}/argsParser.h")
+    message(FATAL_ERROR "Cannot find TensorRT samples common directory. Expected location: ${TRT_SAMPLES_COMMON_DIR}")
+endif()
+
+set(SAMPLES_COMMON_SOURCES
+    "${TRT_SAMPLES_COMMON_DIR}/bfloat16.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/getOptions.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/logger.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/sampleDevice.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/sampleEngines.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/sampleInference.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/sampleOptions.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/sampleReporting.cpp"
+    "${TRT_SAMPLES_COMMON_DIR}/sampleUtils.cpp"
+)
+
+set(SAMPLES_UTILS_SOURCES
+    "${TRT_SAMPLES_UTILS_DIR}/timingCache.cpp"
+    "${TRT_SAMPLES_UTILS_DIR}/fileLock.cpp"
+)
+
+# =============== 头文件包含 ===============
+include_directories(${TENSORRT_INCLUDE_DIR})
+include_directories(${TRT_SAMPLES_COMMON_DIR})
+include_directories(${TRT_SAMPLES_DIR})
+include_directories(${TRT_SAMPLES_UTILS_DIR})
+# ✅ 添加 OpenCV 头文件（find_package 后通常已自动包含，但显式添加更保险）
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+# 查找源文件
+file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE TEST_FILES "test/*.cpp")
+
+# 确保源文件存在
+foreach(src_file ${SRC_FILES} ${TEST_FILES})
+    if(NOT EXISTS ${src_file})
+        message(WARNING "Source file does not exist, skipping: ${src_file}")
+    endif()
+endforeach()
+
+set(ALL_SOURCES ${SRC_FILES} ${TEST_FILES})
+
+# 编译动态库
+add_library(my_project SHARED ${ALL_SOURCES})
+
+# 设置输出路径
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+
+# 添加头文件路径
+target_include_directories(my_project PUBLIC src common utils)
+
+# ✅ 链接库：TensorRT + CUDA + OpenCV（传统变量方式）
+target_link_libraries(my_project 
+    # TensorRT
+    ${TENSORRT_LIBRARY_INFER}
+    ${TENSORRT_LIBRARY_ONNX_PARSER}
+    ${TENSORRT_LIBRARY_PLUGIN}
+    
+    # CUDA
+    ${CUDA_LIBRARIES}
+    cudart
+    
+    # ✅ OpenCV - 使用传统变量（兼容自定义编译版本）
+    ${OpenCV_LIBS}
+)
+
+# 添加测试代码并链接
+# 添加测试代码并链接
+set(ALL_SOURCES_EXE ${TEST_FILES} ${SAMPLES_COMMON_SOURCES} ${SAMPLES_UTILS_SOURCES})
+add_executable(run_tests ${ALL_SOURCES_EXE})
+target_link_libraries(run_tests 
+    my_project
+    ${OpenCV_LIBS}  # ✅ 测试程序也需要链接 OpenCV
+    ${TENSORRT_LIBRARY_INFER}
+    ${TENSORRT_LIBRARY_ONNX_PARSER}
+    ${TENSORRT_LIBRARY_PLUGIN}
+    ${CUDA_LIBRARIES}
+    cudart
+)
+
+# 可选的：安装目标
+install(TARGETS my_project DESTINATION lib)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/common DESTINATION include)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/utils DESTINATION include)
