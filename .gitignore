@@ -1,2 +1,4 @@
 3rdparty/
 model_inference/build/
+samples/
+*/build/
