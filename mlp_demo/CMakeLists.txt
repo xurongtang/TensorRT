@@ -16,7 +16,7 @@ set(CMAKE_INSTALL_RPATH "/home/rton/TensorRT/TensorRT-10.11.0.33/targets/x86_64-
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 # create link for executable files
-add_executable(mlp mlp_demo.cpp)
+add_executable(mlp mlp_plus.cpp)
 
 # perform linking with nvinfer libraries
 target_link_libraries(mlp nvinfer)

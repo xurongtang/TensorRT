@@ -47,7 +47,7 @@ python mlp.py
 #### 2.1 生成权重文件
 
 ```bash
-python mlp_plus.py
+已提供
 ```
 
 生成 `mlp_plus.wts`。
@@ -57,7 +57,7 @@ python mlp_plus.py
 编辑 `CMakeLists.txt`，将：
 
 ```cmake
-add_executable(mlp mlp_demo.cpp)
+add_executable(mlp mlp.cpp)
 ```
 
 修改为：
