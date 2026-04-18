@@ -1,0 +1,87 @@
+nohup: ignoring input
+=== ONNX to INT8 TensorRT Engine Converter ===
+ONNX model:           ./yolo26m.onnx
+Engine output:         ./yolom_int8_batch_4.engine
+Calibration data dir:  ./dataset
+Batch size:            4
+Calibration table:     calib.table
+===============================================
+Successfully parsed ONNX model: ./yolo26m.onnx
+Network input: name="images", dims=[1, 3, 640, 640]
+  => C=3, H=640, W=640
+Network input dimensions set to: [4, 3, 640, 640]
+Setting INT8 mode...
+FP16 fallback enabled (platform has fast FP16).
+Building INT8 engine (this may take a while)...
+[Calibrator] Calibration batch 1 / 49
+[Calibrator] Calibration batch 2 / 49
+[Calibrator] Calibration batch 3 / 49
+[Calibrator] Calibration batch 4 / 49
+[Calibrator] Calibration batch 5 / 49
+[Calibrator] Calibration batch 6 / 49
+[Calibrator] Calibration batch 7 / 49
+[Calibrator] Calibration batch 8 / 49
+[Calibrator] Calibration batch 9 / 49
+[Calibrator] Calibration batch 10 / 49
+[Calibrator] Calibration batch 11 / 49
+[Calibrator] Calibration batch 12 / 49
+[Calibrator] Calibration batch 13 / 49
+[Calibrator] Calibration batch 14 / 49
+[Calibrator] Calibration batch 15 / 49
+[Calibrator] Calibration batch 16 / 49
+[Calibrator] Calibration batch 17 / 49
+[Calibrator] Calibration batch 18 / 49
+[Calibrator] Calibration batch 19 / 49
+[Calibrator] Calibration batch 20 / 49
+[Calibrator] Calibration batch 21 / 49
+[Calibrator] Calibration batch 22 / 49
+[Calibrator] Calibration batch 23 / 49
+[Calibrator] Calibration batch 24 / 49
+[Calibrator] Calibration batch 25 / 49
+[Calibrator] Calibration batch 26 / 49
+[Calibrator] Calibration batch 27 / 49
+[Calibrator] Calibration batch 28 / 49
+[Calibrator] Calibration batch 29 / 49
+[Calibrator] Calibration batch 30 / 49
+[Calibrator] Calibration batch 31 / 49
+[Calibrator] Calibration batch 32 / 49
+[Calibrator] Calibration batch 33 / 49
+[Calibrator] Calibration batch 34 / 49
+[Calibrator] Calibration batch 35 / 49
+[Calibrator] Calibration batch 36 / 49
+[Calibrator] Calibration batch 37 / 49
+[Calibrator] Calibration batch 38 / 49
+[Calibrator] Calibration batch 39 / 49
+[Calibrator] Calibration batch 40 / 49
+[Calibrator] Calibration batch 41 / 49
+[Calibrator] Calibration batch 42 / 49
+[Calibrator] Calibration batch 43 / 49
+[Calibrator] Calibration batch 44 / 49
+[Calibrator] Calibration batch 45 / 49
+[Calibrator] Calibration batch 46 / 49
+[Calibrator] Calibration batch 47 / 49
+[Calibrator] Calibration batch 48 / 49
+[Calibrator] Calibration batch 49 / 49
+[Calibrator] Calibration cache written to: calib.table (21668 bytes)
+[WARNING] Missing scale and zero-point for tensor /model.23/TopK_output (1), expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/TopK_output_1, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Expand_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Flatten_1_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Tile_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor ONNXTRT_castHelper_122_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor ONNXTRT_Broadcast_129_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/TopK_1_output (1), expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/TopK_1_output_1, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor ONNXTRT_castHelper_131_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Constant_20_output_0_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor ONNXTRT_Broadcast_127_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor (Unnamed Layer* 496) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Mod_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor (Unnamed Layer* 495) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Unsqueeze_2_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Expand_1_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Add_2_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[WARNING] Missing scale and zero-point for tensor /model.23/Tile_1_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+Engine built successfully in 205 seconds.
+INT8 TensorRT engine saved to: ./yolom_int8_batch_4.engine
+Engine size: 28 MB

@@ -11,7 +11,8 @@
 ├── mlp_demo                 # MLP 手写计算图 Demo（学习 TRT API）
 ├── onnx2tensorrt            # ONNX 模型转 TensorRT Engine 脚本
 ├── tensorrt_inference_base  # TensorRT 推理基类（封装加载与推理）
-├── yolom_26_trt             # YOLO 目标检测 TensorRT 推理实现
+├── yolom_26_trt             # YOLO 目标检测 TensorRT 推理实现（FP32/FP16）
+├── yolom_26_int8_batch      # YOLO26 INT8 量化 + 批量推理
 └── README.md                # 项目说明文档
 ```
 
@@ -50,7 +51,18 @@
 - **包含**：图像预处理、推理执行、后处理（NMS）、结果绘制。
 - **用途**：端到端的部署参考示例。
 
-
+### 6. `yolom_26_int8_batch` (YOLO26 INT8 量化 + 批量推理)  🔥
+YOLO26 模型的 INT8 量化部署与批量推理实现，是 `yolom_26_trt` 的进阶版本。
+- **功能**：
+  - ONNX → INT8 TensorRT Engine 量化转换（含校准数据集处理）。
+  - 支持 Batch=4 的批量推理，单图耗时仅 **7.42 ms**（相比单图推理 27.77 ms，吞吐提升 **3.7 倍**）。
+  - 完整的预处理（Letterbox + 归一化）与后处理（置信度过滤 + NMS）。
+- **关键技术**：
+  - 使用 `IInt8EntropyCalibrator2` 熵校准算法进行 INT8 量化。
+  - FP16 回退机制，解决 SiLU 等算子的 INT8 兼容性问题。
+  - 逐图顺序推理策略，规避 one-to-one 检测头的 batch 维度问题。
+  - 类别感知 NMS，消除量化噪声导致的重复检测。
+- **详见**：[`yolom_26_int8_batch/readme.md`](yolom_26_int8_batch/readme.md)
 
 ## 🔧 依赖环境
 | 组件 | 版本 | 验证命令 |
