@@ -226,37 +226,54 @@ bool YOLOM26Int8Batch::infer_batch(const std::vector<cv::Mat>& images,
 
     results.resize(images.size());
 
-    // ---- Strategy: run each image individually to avoid batch dimension issues ----
-    // The YOLO26 one-to-one head (model.23) has internal TopK/GatherElements
-    // that may not correctly handle batch > 1 with the static output shape [300, 6].
-    // Running each image separately ensures correct results.
-    for (size_t i = 0; i < images.size(); ++i) {
+    /*
+    ## 真正的多 batch 并行推理
+    ONNX 模型已导出为 batch=4 的静态尺寸：输入 `[4, 3, 640, 640]`，输出 `[4, 300, 6]`。
+    `model.23` 内部的 `TopK` 操作使用 `axis=-1`，在每个图像的检测维度上独立操作，
+    因此每张图各自产生 300 个检测结果，不会跨图共享检测名额。
+
+    推理流程：
+    1. 预处理所有图像 → 填入 batch 输入缓冲区
+    2. 一次性 H2D 传输整个 batch
+    3. 执行一次推理（所有图像并行处理）
+    4. 一次性 D2H 传输整个 batch 输出
+    5. 对每张图的输出切片分别做后处理
+    */
+
+    int validBatch = static_cast<int>(images.size());
+
+    // 1. 预处理所有图像，填入 batch 缓冲区
+    std::vector<LetterboxInfo> infos(validBatch);
+    memset(h_input, 0, totalInputSize * sizeof(float));  // 清零整个缓冲区
+
+    for (int i = 0; i < validBatch; ++i) {
         if (images[i].empty()) {
             std::cerr << "Image " << i << " is empty!" << std::endl;
             return false;
         }
+        infos[i] = preprocessImage(images[i], h_input + i * singleInputSize);
+    }
 
-        LetterboxInfo info = preprocessImage(images[i], h_input);
-        memset(h_input + singleInputSize, 0, (totalInputSize - singleInputSize) * sizeof(float));
+    // 2. H2D - 传输整个 batch
+    cudaMemcpy(d_input, h_input, totalInputSize * sizeof(float), cudaMemcpyHostToDevice);
 
-        // H2D
-        cudaMemcpy(d_input, h_input, totalInputSize * sizeof(float), cudaMemcpyHostToDevice);
+    // 3. 执行推理（所有图像并行）
+    std::unordered_map<std::string, void*> bindings;
+    bindings[inputTensorName]  = d_input;
+    bindings[outputTensorName] = d_output;
 
-        // Execute
-        std::unordered_map<std::string, void*> bindings;
-        bindings[inputTensorName]  = d_input;
-        bindings[outputTensorName] = d_output;
+    if (!executeInference(bindings)) {
+        std::cerr << "Batch inference execution failed!" << std::endl;
+        return false;
+    }
 
-        if (!executeInference(bindings)) {
-            std::cerr << "Batch inference execution failed at image " << i << "!" << std::endl;
-            return false;
-        }
+    // 4. D2H - 读取整个 batch 输出
+    cudaMemcpy(h_output, d_output, totalOutputSize * sizeof(float), cudaMemcpyDeviceToHost);
 
-        // D2H - read only the first image's output
-        cudaMemcpy(h_output, d_output, singleOutputSize * sizeof(float), cudaMemcpyDeviceToHost);
-
-        // Postprocess
-        postprocessImage(h_output, 300, info, results[i], conf_threshold);
+    // 5. 对每张图的输出切片做后处理
+    for (int i = 0; i < validBatch; ++i) {
+        postprocessImage(h_output + i * singleOutputSize, 300,
+                         infos[i], results[i], conf_threshold);
     }
 
     return true;
